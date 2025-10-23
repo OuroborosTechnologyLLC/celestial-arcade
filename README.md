@@ -196,3 +196,4 @@ celestial-arcade/
 4. **Add Admin UI** - Game upload and management interface
 
 For detailed implementation guide, see [PLAN.md](PLAN.md).
+=======
