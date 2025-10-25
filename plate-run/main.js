@@ -1,18 +1,20 @@
 import * as Phaser from './libs/phaser.esm.js';
 
-let modulePath = './scenes/mainScene.js';
-const { default: MainScene } = await import(`${modulePath}?t=${Date.now()}`);
+let mainPath = './scenes/mainScene.js';
+const { default: MainScene } = await import(`${mainPath}?t=${Date.now()}`);
+let runPath = './scenes/runScene.js';
+const { default: RunScene } = await import(`${runPath}?t=${Date.now()}`);
 
 const config = {
 	type: Phaser.AUTO,
-	backgroundColor: 'rgb(100, 200, 50)',
 	scale: {
 		mode: Phaser.Scale.RESIZE, // auto-resize with window
 		autoCenter: Phaser.Scale.CENTER_BOTH,
 		width: '100%',
 		height: '100%',
 	},
-	scene: [ MainScene ],
+	// scene: [ MainScene ],
+	scene: [ RunScene ],
 };
 const game = new Phaser.Game(config);
 window.game = game;

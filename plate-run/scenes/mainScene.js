@@ -3,16 +3,21 @@ import * as Phaser from '../libs/phaser.esm.js';
 export default class MainScene extends Phaser.Scene {
 	constructor() {
 		super('MainScene');
+		this.camera = null;
 		this.horizonY = 0;
 		this.margin = 24;
+		this.maxSpeed = 0.07;
+		this.minSpeed = 0.02;
 		this.numStrips = 100;
 		this.roadHeight = 10;
 		this.roadOffset = 0;
-		this.roadSectionSize = 5;
+		this.roadSectionSize = 10;
 		this.roadStrips = [];
 		this.roadWidth = 200;
-		this.speed = 0.0;
-		this.speedChange = 0.001;
+		this.speed = this.minSpeed;
+		this.speedChange = 0.01;
+		this.fogOverlay = null;
+		this.fogDensity = 0; // changes dynamically
 	}
 
 	preload() {
@@ -38,34 +43,52 @@ export default class MainScene extends Phaser.Scene {
 			roadStrips.push(strip);
 		}
 
-		scale.on('resize', this.resize, this);
+		const g = add.graphics();
+		g.fillStyle(0x050e39, 1);
+		g.fillRect(0, 0, scale.width, this.horizonY);
+		g.generateTexture('sky', scale.width, this.horizonY);
+		this.sky = add.image(0, 0, 'sky').setOrigin(0).setDepth(1);
+		g.fillStyle(0x0a2f0a, 1);
+		g.fillRect(0, this.horizonY, scale.width, this.horizonY);
+		g.generateTexture('ground', scale.width, this.horizonY);
+		this.ground = add.image(0, 2, 'ground').setOrigin(0).setDepth(1);
+		g.destroy();
+
+		this.fogOverlay = add.graphics({ x: 0, y: 0 }).setDepth(100);
+		const camera = this.cameras.main;
+		camera.postFX.addVignette(0.5, 0.5, 0.7);
 
 		this.title = add.text(scale.width/2, margin, 'Plate Run', {
-			font: "32px Arial",
-			fill: "#ffffff",
-			align: "center",
-		}).setOrigin(0.5).setShadow(1, 1, 'rgba(0, 0, 0, 0.5)', 5);
+			font: '32px Arial',
+			fill: '#ffffff',
+			align: 'center',
+			stroke: '#000000',
+			strokeThickness: 2,
+		}).setOrigin(0.5).setShadow(1, 1, 'rgba(0, 0, 0, 0.5)', 5).setDepth(999);
+
+		this.speedText = this.add.text(16, 16, 'Speed: 0\nUse Arrow Keys', {
+			font: '14px Monospace',
+			fill: '#ffffff',
+			stroke: '#000000',
+			strokeThickness: 2,
+		}).setShadow(1, 1, 'rgba(0, 0, 0, 0.5)', 5).setDepth(999);
 
 		this.cursors = this.input.keyboard.createCursorKeys();
 
+		scale.on('resize', this.resize, this);
 		this.resize({ width: scale.width, height: scale.height });
 	}
 
 	resize({ width, height }) {
-		console.log('Resized to', width, height);
+		this.horizonY = height / 2;
 		this.title.x = width / 2;
 	}
 
 	update(time, delta) {
 		const { horizonY, numStrips, roadStrips, roadWidth, scale } = this;
 
-		if (this.cursors.up.isDown) {
-			this.speed += this.speedChange;
-		}
-		if (this.cursors.down.isDown) {
-			this.speed -= this.speedChange;
-			this.speed = Math.max(0, this.speed);
-		}
+		if (this.cursors.up.isDown) this.speed = Phaser.Math.Linear(this.speed, this.maxSpeed, 0.1);
+		else if (this.cursors.down.isDown) this.speed = Phaser.Math.Linear(this.speed, this.minSpeed, 0.1);
 
 		this.roadOffset += this.speed * delta;
 
@@ -74,9 +97,34 @@ export default class MainScene extends Phaser.Scene {
 			const eased = depth;
 			const perspective = 1 + eased * 6;
 			const width = roadWidth * perspective;
-			strip.x = scale.width / 2 - width / 2;
-			strip.scaleX = perspective;
-			strip.y = horizonY + depth * horizonY;
+
+			strip.setPosition(scale.width / 2 - width / 2, horizonY + depth * horizonY);
+			strip.setScale(perspective);
+			strip.setDepth(depth * 10);
 		});
+
+		this.fogDensity = Phaser.Math.Clamp((this.speed - this.minSpeed) / (this.maxSpeed - this.minSpeed), 0, 1);
+		this.drawFog(scale.width, scale.height);
+		this.speedText.setText(`Speed: ${this.speed.toFixed(3)}`);
+	}
+
+	drawFog(width, height) {
+		const g = this.fogOverlay;
+		g.clear();
+
+		// Fog color & gradient alpha
+		const fogColor = 0x222222; // light gray fog
+		const fogAlphaNear = 0.0;  // no fog at player
+		const fogAlphaFar = 0.6 * this.fogDensity + 0.2; // stronger fog at horizon when faster
+
+		// Draw a vertical gradient (top -> bottom)
+		const steps = 50;
+		for (let i = 0; i < steps; i++) {
+			const t = i / steps;
+			const alpha = Phaser.Math.Interpolation.Linear([fogAlphaNear, fogAlphaFar], t);
+			const y = this.horizonY * t;
+			g.fillStyle(fogColor, alpha);
+			g.fillRect(0, y, width, 2);
+		}
 	}
 }
