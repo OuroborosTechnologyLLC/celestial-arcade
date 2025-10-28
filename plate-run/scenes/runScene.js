@@ -1,5 +1,6 @@
 import * as Phaser from '../libs/phaser.esm.js';
 import Player from '../objects/player.js';
+import Tree from '../objects/tree.js';
 import { settings } from '../settings.js';
 
 export default class RunScene extends Phaser.Scene {
@@ -15,16 +16,18 @@ export default class RunScene extends Phaser.Scene {
 	}
 
 	preload() {
-		this.load.spritesheet('spookyTrees', '../assets/spooky_trees.png', { frameWidth: 59, frameHeight: 148 });
 		Player.preload(this);
+		Tree.preload(this);
 	}
 
 	create() {
+		Player.createAnimations(this);
+
 		this.cursors = this.input.keyboard.createCursorKeys();
 
 		const scale = this.scale;
-		this.player = new Player(this, scale.width / 2, scale.height / 2, this.currentLane);
-		console.log("this.player:", this.player);
+		this.player = new Player(this, scale.width / 2, scale.height / 2);
+		this.tree = new Tree(this, scale.width, scale.height / 2);
 
 		const camera = this.cameras.main;
 		this.fx = camera.postFX.addVignette(0.5, 0.5, settings.CAMERA_RADIUS_START, 0.5);
@@ -44,16 +47,18 @@ export default class RunScene extends Phaser.Scene {
 		};
 		this.debugTexts.push(this.offsetText = this.add.text(0, 0, '', debugTextConfig));
 		this.debugTexts.push(this.laneText = this.add.text(0, 0, '', debugTextConfig));
+		this.debugTexts.push(this.speedText = this.add.text(0, 0, '', debugTextConfig));
 		this.debugTexts.forEach((a, i) => {
 			a.setShadow(1, 1, 'rgba(0, 0, 0, 0.5)', 5).setDepth(999);
 			if (i > 0) {
-				a.setPosition(16, 16 + this.debugTexts[i-1].height + 2);
+				a.setPosition(16, 18 + (16 * i));
 			} else {
 				a.setPosition(16, 16);
 			}
 			camera.ignore(a);
 		});
 		this.uiCamera.ignore(this.player);
+		this.uiCamera.ignore(this.tree);
 	}
 
 	resize({ width, height }) {
@@ -104,7 +109,9 @@ export default class RunScene extends Phaser.Scene {
 		}
 
 		this.player.updatePosition();
+		this.tree.updatePosition();
 		this.offsetText.setText(`offset (x): ${offset}`);
 		this.laneText.setText(`lane: ${this.currentLane}`);
+		this.speedText.setText(`speed: ${this.speed}`);
 	}
 }
