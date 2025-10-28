@@ -3,20 +3,17 @@ import { settings } from '../settings.js';
 
 export default class Player extends Phaser.GameObjects.Sprite {
 	constructor(scene, x, y) {
-		super(scene, x, y);
+		super(scene, x, y, 'hat');
 		this.setPosition(x, y);
-		this.setTexture('hat');
-		this.setScale(2, 2);
 		scene.add.existing(this);
 
-		if (!scene.anims.exists('hatidle')) {
-			Player.createAnimations(scene);
-		}
+		this.setScale(2, 2);
+		this.play('hatIdle');
 	}
 
 	static preload(scene) {
-		scene.load.spritesheet('hat', '../assets/spritesheets/hat-man-idle.png', { frameWidth: 39, frameHeight: 52 });
-		scene.load.spritesheet('hatWalk', '../assets/spritesheets/hat-man-walk.png', { frameWidth: 39, frameHeight: 52 });
+		scene.load.spritesheet('hat', './assets/spritesheets/hat-man-idle.png', { frameWidth: 39, frameHeight: 52 });
+		scene.load.spritesheet('hatWalk', './assets/spritesheets/hat-man-walk.png', { frameWidth: 39, frameHeight: 52 });
 	}
 
 	static createAnimations(scene) {
@@ -41,16 +38,12 @@ export default class Player extends Phaser.GameObjects.Sprite {
 		});
 	}
 
-	create() {
-		this.play('hatIdle');
-	}
-
 	resize(width, height) {
 		this.setPosition(width / 2, Phaser.Math.Linear(height / 2, (height / 2) + this.getCurrentLaneOffset(), settings.CAMERA_MOVE_RATE));
 	}
 
 	getCurrentLaneOffset() {
-		const l = this.currentLane;
+		const l = this.scene.currentLane;
 		switch (l) {
 			case 0:
 				return -settings.LANE_OFFSET;
@@ -59,7 +52,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
 				return +settings.LANE_OFFSET;
 				break;
 			case 1:
-			defualt:
+			default:
 				return 0;
 				break;
 		}
@@ -67,6 +60,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
 	}
 
 	updatePosition() {
-		this.setPosition(this.scale.width / 2, Phaser.Math.Linear(this.scale.height / 2, (this.scale.height / 2) + this.getCurrentLaneOffset(), settings.CAMERA_MOVE_RATE));
+		const scale = this.scene.scale;
+		this.setPosition(scale.width / 2, Phaser.Math.Linear(this.y, (scale.height / 2) + this.getCurrentLaneOffset(), settings.CAMERA_MOVE_RATE));
 	}
 }
