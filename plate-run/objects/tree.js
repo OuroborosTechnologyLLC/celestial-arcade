@@ -1,13 +1,17 @@
 import * as Phaser from '../libs/phaser.esm.js';
 import { settings } from '../settings.js';
 
-export default class Tree extends Phaser.GameObjects.Sprite {
+export default class Tree extends Phaser.Physics.Arcade.Sprite {
 	constructor(scene, x, y) {
 		super(scene, x, y, 'spookyTrees');
 		this.setPosition(x, y);
 		scene.add.existing(this);
+		scene.physics.add.existing(this);
 
 		this.setScale(2, 2);
+		this.setSize(48, 48);
+		this.setOffset(10, 100);
+		this.setImmovable(true);
 	}
 
 	static preload(scene) {
@@ -15,10 +19,11 @@ export default class Tree extends Phaser.GameObjects.Sprite {
 	}
 
 	updatePosition() {
-		this.setPosition(Phaser.Math.Linear(this.x, this.x - this.scene.speed, settings.CAMERA_MOVE_RATE), this.y);
 		if (this.x + this.width < 0) {
-			console.log("destroying tree");
-			this.destroy();
+			this.setPosition(this.scene.scale.width, this.y);
+		} else {
+			// this.setPosition(Phaser.Math.Linear(this.x, this.x - this.scene.speed, settings.CAMERA_MOVE_RATE), this.y);
+			this.setVelocityX(-this.scene.speed);
 		}
 	}
 }
