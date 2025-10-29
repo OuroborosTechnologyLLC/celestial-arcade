@@ -21,20 +21,23 @@ export default class RunScene extends Phaser.Scene {
 	}
 
 	create() {
+		this.physics.world.setBounds(0, 0, this.scale.width, this.scale.height);
 		Player.createAnimations(this);
 
 		this.cursors = this.input.keyboard.createCursorKeys();
 
 		const scale = this.scale;
 		this.player = new Player(this, scale.width / 2, scale.height / 2);
-		this.tree = new Tree(this, scale.width, scale.height / 2);
+		this.trees = this.physics.add.group();
+		this.trees.add(new Tree(this, this.getLanePosition().x, this.getLanePosition().y));
 
 		const camera = this.cameras.main;
-		this.fx = camera.postFX.addVignette(0.5, 0.5, settings.CAMERA_RADIUS_START, 0.5);
-		camera.setOrigin(0.5).setPosition(0, 0).setBackgroundColor('#3d2d22').startFollow(this.player, true, 0.1, 0.1);
+		// this.fx = camera.postFX.addVignette(0.5, 0.5, settings.CAMERA_RADIUS_START, 0.5);
+		// camera.setOrigin(0.5).setPosition(0, 0).setBackgroundColor('#3d2d22').startFollow(this.player, true, 0.1, 0.1);
+		camera.setOrigin(0.5).setPosition(0, 0).setBackgroundColor('#3d2d22');
 
-		this.uiCamera = this.cameras.add(0, 0, scale.width, scale.height);
-		this.uiCamera.setBackgroundColor('rgba(0,0,0,0)');
+		// this.uiCamera = this.cameras.add(0, 0, scale.width, scale.height);
+		// this.uiCamera.setBackgroundColor('rgba(0,0,0,0)');
 
 		scale.on('resize', this.resize, this);
 		this.resize({ width: scale.width, height: scale.height });
@@ -55,10 +58,12 @@ export default class RunScene extends Phaser.Scene {
 			} else {
 				a.setPosition(16, 16);
 			}
-			camera.ignore(a);
+			// camera.ignore(a);
 		});
-		this.uiCamera.ignore(this.player);
-		this.uiCamera.ignore(this.tree);
+		// this.uiCamera.ignore(this.player);
+		// this.uiCamera.ignore(this.trees);
+
+		this.physics.add.overlap(this.player, this.trees, this.handleTreeOverlap, null, this);
 	}
 
 	resize({ width, height }) {
@@ -66,6 +71,11 @@ export default class RunScene extends Phaser.Scene {
 	}
 
 	update(time, delta) {
+		// this.handleInput();
+		// this.difficultyController.update(delta, this.isRunning);
+		// this.spawnController.update(delta);
+		// this.cameraController.update(delta);
+		// this.player.updatePosition();
 		if (this.cursors.right.isDown) {
 			this.isRunning = true;
 			this.speed = settings.MAX_SPEED;
@@ -78,15 +88,15 @@ export default class RunScene extends Phaser.Scene {
 			this.speed = settings.MIN_SPEED;
 		}
 
-		if (this.isRunning && this.fx.radius >= settings.CAMERA_RADIUS_END) {
-			this.fx.radius -= 0.01;
-		} else if (!this.isRunning && this.fx.radius <= settings.CAMERA_RADIUS_START) {
-			this.fx.radius += 0.01;
-		}
+		// if (this.isRunning && this.fx.radius >= settings.CAMERA_RADIUS_END) {
+		// 	this.fx.radius -= 0.01;
+		// } else if (!this.isRunning && this.fx.radius <= settings.CAMERA_RADIUS_START) {
+		// 	this.fx.radius += 0.01;
+		// }
 
 		const offset = this.cursors.right.isDown ? -100 : 0;
-		this.cameraOffsetX = Phaser.Math.Linear(this.cameraOffsetX, offset, 0.1);
-		this.cameras.main.setFollowOffset(this.cameraOffsetX, 0);
+		// this.cameraOffsetX = Phaser.Math.Linear(this.cameraOffsetX, offset, 0.1);
+		// this.cameras.main.setFollowOffset(this.cameraOffsetX, 0);
 
 		if (!this.hasMovedLanes && this.isMoving) {
 			if (this.cursors.up.isDown) {
@@ -109,9 +119,21 @@ export default class RunScene extends Phaser.Scene {
 		}
 
 		this.player.updatePosition();
-		this.tree.updatePosition();
+		this.trees.children.entries.forEach((a) => a.updatePosition());
 		this.offsetText.setText(`offset (x): ${offset}`);
 		this.laneText.setText(`lane: ${this.currentLane}`);
 		this.speedText.setText(`speed: ${this.speed}`);
+	}
+
+	getLanePosition() {
+		return { x: 0, y: 0 };
+	}
+
+	handleTreeOverlap(a, b) {
+		return;
+	}
+
+	handleInput() {
+		// Input logic here
 	}
 }

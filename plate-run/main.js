@@ -13,6 +13,16 @@ const config = {
 		width: '100%',
 		height: '100%',
 	},
+	physics: {
+		default: 'arcade',
+		arcade: {
+			debug: true,
+			gravity: {
+				x: 0,
+				y: 0
+			}
+		}
+	},
 	// scene: [ MainScene ],
 	scene: [ RunScene ],
 };

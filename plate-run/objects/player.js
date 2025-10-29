@@ -1,12 +1,16 @@
 import * as Phaser from '../libs/phaser.esm.js';
+import Tree from './tree.js';
 import { settings } from '../settings.js';
 
-export default class Player extends Phaser.GameObjects.Sprite {
+export default class Player extends Phaser.Physics.Arcade.Sprite {
 	constructor(scene, x, y) {
 		super(scene, x, y, 'hat');
 		this.setPosition(x, y);
 		scene.add.existing(this);
+		scene.physics.add.existing(this);
 
+		this.setDirectControl(true);
+		this.body.setCollideWorldBounds(true);
 		this.setScale(2, 2);
 		this.play('hatIdle');
 	}
