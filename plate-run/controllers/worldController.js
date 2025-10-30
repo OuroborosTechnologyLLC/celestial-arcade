@@ -1,3 +1,5 @@
+import { settings } from '../settings.js';
+
 export default class WorldController {
 	constructor(scene) {
 		this.scene = scene;

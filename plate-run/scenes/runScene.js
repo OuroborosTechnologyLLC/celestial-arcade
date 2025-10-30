@@ -1,14 +1,16 @@
 import * as Phaser from '../libs/phaser.esm.js';
+import WorldController from '../controllers/worldController.js';
+import DifficultyController from '../controllers/difficultyController.js';
+import SpawnController from '../controllers/spawnController.js';
+import CameraController from '../controllers/cameraController.js';
 import Player from '../objects/player.js';
-import Tree from '../objects/tree.js';
+import Obstacle from '../objects/obstacle.js';
 import { settings } from '../settings.js';
 
 export default class RunScene extends Phaser.Scene {
 	constructor() {
 		super('RunScene');
-		this.cameraOffsetX = 0;
 		this.currentLane = 1;
-		this.fx = null;
 		this.isMoving = true;
 		this.isRunning = false;
 		this.speed = settings.MIN_SPEED;
@@ -17,30 +19,22 @@ export default class RunScene extends Phaser.Scene {
 
 	preload() {
 		Player.preload(this);
-		Tree.preload(this);
+		Obstacle.preload(this);
 	}
 
 	create() {
-		this.physics.world.setBounds(0, 0, this.scale.width, this.scale.height);
 		Player.createAnimations(this);
-
 		this.cursors = this.input.keyboard.createCursorKeys();
-
 		const scale = this.scale;
-		this.player = new Player(this, scale.width / 2, scale.height / 2);
-		this.trees = this.physics.add.group();
-		this.trees.add(new Tree(this, this.getLanePosition().x, this.getLanePosition().y));
-
-		const camera = this.cameras.main;
-		// this.fx = camera.postFX.addVignette(0.5, 0.5, settings.CAMERA_RADIUS_START, 0.5);
-		// camera.setOrigin(0.5).setPosition(0, 0).setBackgroundColor('#3d2d22').startFollow(this.player, true, 0.1, 0.1);
-		camera.setOrigin(0.5).setPosition(0, 0).setBackgroundColor('#3d2d22');
-
-		// this.uiCamera = this.cameras.add(0, 0, scale.width, scale.height);
-		// this.uiCamera.setBackgroundColor('rgba(0,0,0,0)');
-
 		scale.on('resize', this.resize, this);
+		this.player = new Player(this, scale.width / 2, scale.height / 2);
 		this.resize({ width: scale.width, height: scale.height });
+		this.worldController = new WorldController(this);
+		this.difficultyController = new DifficultyController(this);
+		this.spawnController = new SpawnController(this, this.worldController, this.difficultyController);
+		this.cameraController = new CameraController(this, this.player);
+		this.obstacles = this.add.group();
+		this.obstacles.add(new Obstacle(this, this.getLanePosition().x, this.getLanePosition().y));
 
 		const debugTextConfig = {
 			font: '14px Monospace',
@@ -58,12 +52,10 @@ export default class RunScene extends Phaser.Scene {
 			} else {
 				a.setPosition(16, 16);
 			}
-			// camera.ignore(a);
+			this.cameraController.camera.ignore(a);
 		});
-		// this.uiCamera.ignore(this.player);
-		// this.uiCamera.ignore(this.trees);
-
-		this.physics.add.overlap(this.player, this.trees, this.handleTreeOverlap, null, this);
+		this.cameraController.uiCamera.ignore(this.player);
+		this.cameraController.uiCamera.ignore(this.obstacles);
 	}
 
 	resize({ width, height }) {
@@ -71,11 +63,36 @@ export default class RunScene extends Phaser.Scene {
 	}
 
 	update(time, delta) {
-		// this.handleInput();
-		// this.difficultyController.update(delta, this.isRunning);
-		// this.spawnController.update(delta);
-		// this.cameraController.update(delta);
-		// this.player.updatePosition();
+		this.handleInput();
+		this.difficultyController.update(delta, this.isRunning);
+		this.spawnController.update(delta);
+		this.cameraController.update(delta, this.isRunning);
+		this.player.updatePosition();
+		this.obstacles.children.entries.forEach((a) => a.updatePosition());
+		this.offsetText.setText(`offset (x): ${this.cameraController.offset}`);
+		this.laneText.setText(`lane: ${this.currentLane}`);
+		this.speedText.setText(`speed: ${this.speed}`);
+
+		const playerBounds = this.player.getBounds();
+		this.obstacles.children.entries.forEach((a) => {
+			const obstacleBounds = a.getBounds();
+
+			if (Phaser.Geom.Intersects.RectangleToRectangle(playerBounds, obstacleBounds)) {
+				console.log("Overlap detected!");
+				this.handleTreeOverlap(this.player, a);
+			}
+		});
+	}
+
+	getLanePosition() {
+		return { x: 0, y: 500 };
+	}
+
+	handleTreeOverlap(a, b) {
+		return;
+	}
+
+	handleInput() {
 		if (this.cursors.right.isDown) {
 			this.isRunning = true;
 			this.speed = settings.MAX_SPEED;
@@ -87,16 +104,6 @@ export default class RunScene extends Phaser.Scene {
 			this.isRunning = false;
 			this.speed = settings.MIN_SPEED;
 		}
-
-		// if (this.isRunning && this.fx.radius >= settings.CAMERA_RADIUS_END) {
-		// 	this.fx.radius -= 0.01;
-		// } else if (!this.isRunning && this.fx.radius <= settings.CAMERA_RADIUS_START) {
-		// 	this.fx.radius += 0.01;
-		// }
-
-		const offset = this.cursors.right.isDown ? -100 : 0;
-		// this.cameraOffsetX = Phaser.Math.Linear(this.cameraOffsetX, offset, 0.1);
-		// this.cameras.main.setFollowOffset(this.cameraOffsetX, 0);
 
 		if (!this.hasMovedLanes && this.isMoving) {
 			if (this.cursors.up.isDown) {
@@ -118,22 +125,5 @@ export default class RunScene extends Phaser.Scene {
 			this.player.play('hatIdle');
 		}
 
-		this.player.updatePosition();
-		this.trees.children.entries.forEach((a) => a.updatePosition());
-		this.offsetText.setText(`offset (x): ${offset}`);
-		this.laneText.setText(`lane: ${this.currentLane}`);
-		this.speedText.setText(`speed: ${this.speed}`);
-	}
-
-	getLanePosition() {
-		return { x: 0, y: 0 };
-	}
-
-	handleTreeOverlap(a, b) {
-		return;
-	}
-
-	handleInput() {
-		// Input logic here
 	}
 }
