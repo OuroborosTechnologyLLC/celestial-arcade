@@ -1,10 +1,11 @@
+import { settings } from '../settings.js';
+
 export default class SpawnController {
 	constructor(scene, worldController, difficultyController) {
 		this.scene = scene;
 		this.world = worldController;
 		this.difficulty = difficultyController;
-		this.trees = scene.physics.add.group();
-		this.obstacles = scene.physics.add.group();
+		this.obstacles = scene.add.group();
 	}
 	
 	update(delta) {

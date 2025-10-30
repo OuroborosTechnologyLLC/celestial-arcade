@@ -1,16 +1,12 @@
 import * as Phaser from '../libs/phaser.esm.js';
-import Tree from './tree.js';
+import Obstacle from './obstacle.js';
 import { settings } from '../settings.js';
 
-export default class Player extends Phaser.Physics.Arcade.Sprite {
+export default class Player extends Phaser.GameObjects.Sprite {
 	constructor(scene, x, y) {
 		super(scene, x, y, 'hat');
 		this.setPosition(x, y);
 		scene.add.existing(this);
-		scene.physics.add.existing(this);
-
-		this.setDirectControl(true);
-		this.body.setCollideWorldBounds(true);
 		this.setScale(2, 2);
 		this.play('hatIdle');
 	}
@@ -65,6 +61,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
 	updatePosition() {
 		const scale = this.scene.scale;
-		this.setPosition(scale.width / 2, Phaser.Math.Linear(this.y, (scale.height / 2) + this.getCurrentLaneOffset(), settings.CAMERA_MOVE_RATE));
+		// this.setPosition(scale.width / 2, Phaser.Math.Linear(this.y, (scale.height / 2) + this.getCurrentLaneOffset(), settings.CAMERA_MOVE_RATE));
+		this.setPosition(scale.width / 2, (scale.height / 2) + this.getCurrentLaneOffset());
 	}
 }

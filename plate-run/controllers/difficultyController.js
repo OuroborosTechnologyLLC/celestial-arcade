@@ -1,3 +1,5 @@
+import { settings } from '../settings.js';
+
 export default class DifficultyController {
 	constructor(scene) {
 		this.scene = scene;
