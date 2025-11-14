@@ -1,0 +1,27 @@
+{
+  "version": "1.0.0",
+  "entryPoint": "index.html",
+  "assets": [
+    "index.html",
+    "main.js",
+    "settings.js",
+    "scenes/mainScene.js",
+    "scenes/runScene.js",
+    "controllers/cameraController.js",
+    "controllers/difficultyController.js",
+    "controllers/spawnController.js",
+    "controllers/worldController.js",
+    "objects/player.js",
+    "objects/obstacle.js",
+    "modules/progression.js",
+    "libs/phaser.esm.js",
+    "libs/phaser-arcade-physics.js",
+    "libs/stats.module.js",
+    "assets/spritesheets/hat-man-idle.png",
+    "assets/spritesheets/hat-man-walk.png",
+    "assets/spooky_trees.png",
+    "assets/diamonds.png"
+  ],
+  "totalSize": 15352624,
+  "lastUpdated": "2025-11-14T00:00:00Z"
+}
