@@ -39,25 +39,21 @@ export default class RunScene extends Phaser.Scene {
 		this.spawnController = new SpawnController(this, this.worldController, this.difficultyController);
 		this.cameraController = new CameraController(this, this.player);
 		this.obstacles = this.add.group();
-		this.obstacles.add(new Obstacle(this, 0));
-		this.obstacles.add(new Obstacle(this, 1));
-		this.obstacles.add(new Obstacle(this, 2));
+		this.obstacles.add(new Obstacle(this, this.getLanePosition().x, this.getLanePosition().y));
 
-		const debugTextConfig = {
-			font: '14px Monospace',
-			fill: '#ffffff',
-			stroke: '#000000',
-			strokeThickness: 2,
-		};
+		const debugTextConfig = { font: '14px Monospace', fill: '#ffffff', stroke: '#000000', strokeThickness: 2 };
 		this.debugTexts.push(this.offsetText = this.add.text(0, 0, '', debugTextConfig));
 		this.debugTexts.push(this.laneText = this.add.text(0, 0, '', debugTextConfig));
 		this.debugTexts.push(this.speedText = this.add.text(0, 0, '', debugTextConfig));
+		this.debugTexts.push(this.scoreText = this.add.text(0, 0, '', { font: '20px Monospace', fill: '#ffff00', stroke: '#000000', strokeThickness: 3 }));
 		this.debugTexts.forEach((a, i) => {
 			a.setShadow(1, 1, 'rgba(0, 0, 0, 0.5)', 5).setDepth(999);
-			if (i > 0) {
+			if (i > 0 && i < 3) {
 				a.setPosition(16, 18 + (16 * i));
-			} else {
+			} else if (i === 0) {
 				a.setPosition(16, 16);
+			} else if (i === 3) {
+				a.setPosition(scale.width - 150, 16);
 			}
 			this.cameraController.camera.ignore(a);
 		});
@@ -90,6 +86,7 @@ export default class RunScene extends Phaser.Scene {
 			if (Phaser.Geom.Intersects.RectangleToRectangle(playerBounds, obstacleBounds)) {
 				this.handleGameOver();
 				this.handleTreeOverlap(this.player, a);
+				this.handleGameOver();
 			}
 		});
 	}
