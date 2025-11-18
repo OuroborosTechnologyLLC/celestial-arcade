@@ -1,1 +1,0 @@
-- diamonds icon by Skoll under CC BY 3.0
