@@ -34,7 +34,9 @@ export default class RunScene extends Phaser.Scene {
 		this.spawnController = new SpawnController(this, this.worldController, this.difficultyController);
 		this.cameraController = new CameraController(this, this.player);
 		this.obstacles = this.add.group();
-		this.obstacles.add(new Obstacle(this, this.getLanePosition().x, this.getLanePosition().y));
+		this.obstacles.add(new Obstacle(this, 0));
+		this.obstacles.add(new Obstacle(this, 1));
+		this.obstacles.add(new Obstacle(this, 2));
 
 		const debugTextConfig = {
 			font: '14px Monospace',
@@ -56,10 +58,6 @@ export default class RunScene extends Phaser.Scene {
 		});
 		this.cameraController.uiCamera.ignore(this.player);
 		this.cameraController.uiCamera.ignore(this.obstacles);
-	}
-
-	resize({ width, height }) {
-		this.player.resize(width, height);
 	}
 
 	update(time, delta) {
@@ -86,10 +84,6 @@ export default class RunScene extends Phaser.Scene {
 
 	getLanePosition() {
 		return { x: 0, y: 500 };
-	}
-
-	handleTreeOverlap(a, b) {
-		return;
 	}
 
 	handleInput() {
@@ -124,6 +118,13 @@ export default class RunScene extends Phaser.Scene {
 		} else if (!this.isRunning && !this.isMoving && this.player.anims.currentAnim.key !== 'hatIdle') {
 			this.player.play('hatIdle');
 		}
+	}
 
+	handleResize({ width, height }) {
+		this.player.resize(width, height);
+	}
+
+	handleTreeOverlap(a, b) {
+		return;
 	}
 }
