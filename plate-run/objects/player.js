@@ -61,7 +61,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
 
 	updatePosition() {
 		const scale = this.scene.scale;
-		// this.setPosition(scale.width / 2, Phaser.Math.Linear(this.y, (scale.height / 2) + this.getCurrentLaneOffset(), settings.CAMERA_MOVE_RATE));
-		this.setPosition(scale.width / 2, (scale.height / 2) + this.getCurrentLaneOffset());
+		this.setPosition(scale.width / 2, Math.max(settings.CAMERA_MOVE_RATE, Math.min(Phaser.Math.Linear(this.y, (scale.height / 2) + this.getCurrentLaneOffset(), settings.CAMERA_MOVE_RATE), 0.1)));
+		// this.setPosition(scale.width / 2, (scale.height / 2) + this.getCurrentLaneOffset());
 	}
 }
