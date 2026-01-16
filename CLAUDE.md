@@ -8,6 +8,21 @@ This file provides guidance to Claude Code when working with code in this reposi
 - The project is a minimal account API with JWT authentication
 - Uses Go with Fiber framework, SQLite database, and vanilla JavaScript frontend
 
+## Project Structure
+
+```
+celestial-arcade/
+├── cmd/server/main.go        # Application entry point
+├── internal/
+│   ├── handler/              # HTTP handlers (auth, user, game, progression)
+│   ├── middleware/           # Auth middleware, error helpers
+│   ├── model/                # Data structures (User, Game, Session, etc.)
+│   └── store/                # Database initialization and session operations
+├── games/                    # Game files (static content)
+├── public/                   # Frontend files (static content)
+└── go.mod
+```
+
 ## Build & Run Commands
 
 **IMPORTANT**: Never run the server or build the application. Only use formatting and linting commands.
@@ -17,8 +32,8 @@ This file provides guidance to Claude Code when working with code in this reposi
 - Install dependencies: `go mod tidy` (if needed)
 
 **DO NOT RUN**:
-- `go build`
-- `go run main.go`
+- `go build ./cmd/server`
+- `go run ./cmd/server`
 - Any server startup commands
 
 The user will run the server when needed.

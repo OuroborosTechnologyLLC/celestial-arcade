@@ -199,6 +199,117 @@ window.addEventListener('message', (event) => {
 });
 ```
 
+## API Implementation Plan
+
+### Current State
+
+The server API is robust with:
+- JWT authentication with refresh tokens
+- User management (CRUD with soft delete)
+- Session management with cleanup
+- Games API with tier-based access control
+- Progression sync system
+- Rate limiting (60 req/min, user-based when authenticated, IP-based otherwise)
+- Request body size limits (1MB)
+- Proper error handling and input validation
+
+### Remaining Features
+
+#### 1. Auto-create Free Subscription on Registration
+**Priority: High | Effort: Low**
+
+Users register but never get a subscription record. Add to `internal/handler/user.go` in `CreateUser`:
+```go
+// After creating user, create free subscription
+_, err = db.Exec(`INSERT INTO subscriptions(id, userId, tier, status) VALUES(?, ?, 'free', 'active')`, uuid.New().String(), user.Id)
+```
+
+#### 2. Admin System
+**Priority: High | Effort: Low**
+
+Add `isAdmin` column to users table and create middleware in `internal/middleware/admin.go`:
+```go
+func AdminMiddleware(db *sql.DB) fiber.Handler {
+    return func(c *fiber.Ctx) error {
+        userId, ok := c.Locals("userId").(string)
+        if !ok {
+            return ErrorResponse(c, 401, "Unauthorized")
+        }
+        var isAdmin bool
+        db.QueryRow("SELECT isAdmin FROM users WHERE id = ?", userId).Scan(&isAdmin)
+        if !isAdmin {
+            return ErrorResponse(c, 403, "Admin access required")
+        }
+        return c.Next()
+    }
+}
+```
+
+#### 3. Game Management Endpoints
+**Priority: High | Effort: Medium**
+
+Add to `internal/handler/game.go` and register in `cmd/server/main.go`:
+- `POST /api/admin/games` - Create game entry
+- `PUT /api/admin/games/:slug` - Update game metadata
+- `DELETE /api/admin/games/:slug` - Remove game
+
+#### 4. CORS Configuration
+**Priority: Medium | Effort: Low**
+
+Add to `cmd/server/main.go` before routes:
+```go
+import "github.com/gofiber/fiber/v2/middleware/cors"
+
+app.Use(cors.New(cors.Config{
+    AllowOrigins:     os.Getenv("CORS_ORIGINS"), // or "*" for dev
+    AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
+    AllowMethods:     "GET, POST, PUT, DELETE, OPTIONS",
+    AllowCredentials: true,
+}))
+```
+
+#### 5. Subscription Management Endpoints
+**Priority: Medium | Effort: Medium**
+
+Create `internal/handler/subscription.go` and register in `cmd/server/main.go`:
+- `POST /api/admin/subscriptions` - Assign tier to user
+- `PUT /api/admin/subscriptions/:id` - Update subscription
+- `GET /api/admin/subscriptions` - List all subscriptions
+
+#### 6. Games List Pagination
+**Priority: Low | Effort: Low**
+
+Add `limit` and `offset` query params to `GetGamesPublic` in `internal/handler/game.go`:
+```json
+{"games": [...], "total": 50, "limit": 20, "offset": 0}
+```
+
+#### 7. Database Migration for Existing DBs
+**Priority: Low | Effort: Low**
+
+Add `isAdmin` column to schema in `internal/store/sqlite.go`. For existing databases, run:
+```sql
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_sessions_refreshToken ON sessions(refreshToken);
+ALTER TABLE users ADD COLUMN isAdmin INTEGER DEFAULT 0;
+```
+
+Note: CASCADE constraints require table recreation in SQLite. For prototype, easiest to delete `app.db` and recreate.
+
+### Rate Limiting Notes
+
+Current: 60 req/min per user (authenticated) or IP (unauthenticated)
+
+**VPN/Shared IP Limitations:**
+- VPN users can cycle IPs to bypass limits
+- Shared IPs may unfairly affect legitimate users
+
+**Future mitigations if needed:**
+- Account lockout after N failed login attempts
+- CAPTCHA on registration/login
+- Email verification before login allowed
+- Stricter limits on auth endpoints specifically
+
 ## Future Enhancements
 
 - Admin UI for game uploads and management
