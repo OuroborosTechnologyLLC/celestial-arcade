@@ -37,13 +37,13 @@ type Game struct {
 }
 
 type Subscription struct {
-	Id        string `json:"id"`
-	UserId    string `json:"userId"`
-	Tier      string `json:"tier"`
-	Status    string `json:"status"`
-	StartDate string `json:"startDate"`
-	EndDate   string `json:"endDate,omitempty"`
-	CreatedAt string `json:"createdAt"`
+	Id        string  `json:"id"`
+	UserId    string  `json:"userId"`
+	Tier      string  `json:"tier"`
+	Status    string  `json:"status"`
+	StartDate string  `json:"startDate"`
+	EndDate   *string `json:"endDate,omitempty"`
+	CreatedAt string  `json:"createdAt"`
 }
 
 type GameManifest struct {

@@ -15,6 +15,7 @@ import (
 	"app/internal/store"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
@@ -54,6 +55,16 @@ func initializeAPIRoutes(app *fiber.App, db *sql.DB) {
 
 	apiGroup.Get("/progression", func(c *fiber.Ctx) error { return handler.GetProgression(c, db) })
 	apiGroup.Post("/progression/sync", func(c *fiber.Ctx) error { return handler.SyncProgression(c, db) })
+
+	adminGroup := apiGroup.Group("/admin")
+	adminGroup.Use(middleware.AdminMiddleware(db))
+	adminGroup.Get("/games", func(c *fiber.Ctx) error { return handler.GetGamesPublic(c, db) })
+	adminGroup.Post("/games", func(c *fiber.Ctx) error { return handler.CreateGame(c, db) })
+	adminGroup.Put("/games/:slug", func(c *fiber.Ctx) error { return handler.UpdateGame(c, db) })
+	adminGroup.Delete("/games/:slug", func(c *fiber.Ctx) error { return handler.DeleteGame(c, db) })
+	adminGroup.Get("/subscriptions", func(c *fiber.Ctx) error { return handler.GetSubscriptions(c, db) })
+	adminGroup.Post("/subscriptions", func(c *fiber.Ctx) error { return handler.CreateSubscription(c, db) })
+	adminGroup.Put("/subscriptions/:id", func(c *fiber.Ctx) error { return handler.UpdateSubscription(c, db) })
 }
 
 func main() {
@@ -88,6 +99,12 @@ func main() {
 		log.Info().Str("method", c.Method()).Str("path", c.Path()).Int("status", c.Response().StatusCode()).Dur("latency", time.Since(start)).Msg("request")
 		return err
 	})
+
+	if corsOrigins := os.Getenv("CORS_ORIGINS"); corsOrigins != "" {
+		app.Use(cors.New(cors.Config{AllowOrigins: corsOrigins, AllowHeaders: "Origin, Content-Type, Accept, Authorization", AllowMethods: "GET, POST, PUT, DELETE, OPTIONS", AllowCredentials: true}))
+	}
+
+	app.Get("/health", func(c *fiber.Ctx) error { return c.JSON(fiber.Map{"status": "ok"}) })
 
 	app.Static("/public", "./public")
 	app.Get("/games/:slug/*", func(c *fiber.Ctx) error { return handler.ServeGameFile(c, db) })

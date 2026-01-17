@@ -41,7 +41,8 @@ func InitializeDatabase(dbPath string) *sql.DB {
 			createdDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			modifiedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			deletedDate TIMESTAMP,
-			isDeleted INTEGER DEFAULT 0
+			isDeleted INTEGER DEFAULT 0,
+			isAdmin INTEGER DEFAULT 0
 		)`)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to create table")

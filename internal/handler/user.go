@@ -58,6 +58,11 @@ func CreateUser(c *fiber.Ctx, db *sql.DB) error {
 		return middleware.StandardErrorResponse(c, 500, "Database error", err)
 	}
 
+	_, err = db.Exec("INSERT INTO subscriptions(id, userId, tier, status) VALUES(?,?,?,?)", uuid.New().String(), user.Id, "free", "active")
+	if err != nil {
+		return middleware.StandardErrorResponse(c, 500, "Failed to create subscription", err)
+	}
+
 	row := db.QueryRow("SELECT id, email, createdDate, modifiedDate FROM users WHERE id = ?", user.Id)
 	if err := row.Scan(&user.Id, &user.Email, &user.CreatedDate, &user.ModifiedDate); err != nil {
 		return middleware.StandardErrorResponse(c, 500, "Database error", err)
