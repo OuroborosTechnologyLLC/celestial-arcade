@@ -95,7 +95,7 @@ func GetGamesPublic(c *fiber.Ctx, db *sql.DB) error {
 	}
 	defer rows.Close()
 
-	var games []model.Game
+	games := []model.Game{}
 	for rows.Next() {
 		var game model.Game
 		err := rows.Scan(&game.Id, &game.Slug, &game.Name, &game.Description, &game.Version, &game.TierRequired, &game.ManifestPath, &game.SizeBytes, &game.CreatedAt, &game.UpdatedAt)
@@ -105,10 +105,6 @@ func GetGamesPublic(c *fiber.Ctx, db *sql.DB) error {
 		if CanAccessTier(userTier, game.TierRequired) {
 			games = append(games, game)
 		}
-	}
-
-	if games == nil {
-		games = []model.Game{}
 	}
 
 	return c.JSON(fiber.Map{"games": games, "total": total, "limit": limit, "offset": offset, "userTier": userTier, "isAuthenticated": userId != ""})

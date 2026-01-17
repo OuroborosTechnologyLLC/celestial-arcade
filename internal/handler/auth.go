@@ -52,21 +52,13 @@ func GetRefreshExpiration() time.Duration {
 }
 
 func GenerateToken(userId string) (string, error) {
-	token := jwt.New(jwt.SigningMethodHS256)
-	claims := token.Claims.(jwt.MapClaims)
-	claims["id"] = userId
-	claims["exp"] = time.Now().UTC().Add(GetJWTExpiration()).Unix()
-	claims["type"] = "access"
-	return token.SignedString(secretKey)
+	claims := jwt.MapClaims{"id": userId, "exp": time.Now().UTC().Add(GetJWTExpiration()).Unix(), "type": "access"}
+	return jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(secretKey)
 }
 
 func GenerateRefreshToken(userId string) (string, error) {
-	token := jwt.New(jwt.SigningMethodHS256)
-	claims := token.Claims.(jwt.MapClaims)
-	claims["id"] = userId
-	claims["exp"] = time.Now().UTC().Add(GetRefreshExpiration()).Unix()
-	claims["type"] = "refresh"
-	return token.SignedString(secretKey)
+	claims := jwt.MapClaims{"id": userId, "exp": time.Now().UTC().Add(GetRefreshExpiration()).Unix(), "type": "refresh"}
+	return jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(secretKey)
 }
 
 func LoginUser(c *fiber.Ctx, db *sql.DB) error {

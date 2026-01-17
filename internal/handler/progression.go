@@ -41,13 +41,6 @@ func GetProgression(c *fiber.Ctx, db *sql.DB) error {
 		progression.UnlockedItems = []string{}
 	}
 
-	if progression.Achievements == nil {
-		progression.Achievements = []string{}
-	}
-	if progression.UnlockedItems == nil {
-		progression.UnlockedItems = []string{}
-	}
-
 	return c.JSON(progression)
 }
 

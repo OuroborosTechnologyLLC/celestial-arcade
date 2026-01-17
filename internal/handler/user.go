@@ -53,7 +53,7 @@ func CreateUser(c *fiber.Ctx, db *sql.DB) error {
 		return middleware.ErrorResponse(c, 500, "Failed to hash password")
 	}
 
-	_, err = db.Exec("INSERT INTO users(id, email, password) VALUES(?,?,?)", user.Id, user.Email, string(hashed))
+	_, err = db.Exec("INSERT INTO users(id, email, password) VALUES(?,?,?)", user.Id, user.Email, hashed)
 	if err != nil {
 		return middleware.StandardErrorResponse(c, 500, "Database error", err)
 	}
