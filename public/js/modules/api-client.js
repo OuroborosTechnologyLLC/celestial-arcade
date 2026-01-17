@@ -52,6 +52,7 @@ export function clearAuth() {
     localStorage.removeItem('token');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('userEmail');
+    localStorage.removeItem('isAdmin');
 }
 
 export function isAuthenticated() {

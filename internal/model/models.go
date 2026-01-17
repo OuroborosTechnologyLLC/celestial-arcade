@@ -8,6 +8,7 @@ type User struct {
 	Password        string `json:"password,omitempty"`
 	ConfirmPassword string `json:"confirmPassword,omitempty"`
 	CurrentPassword string `json:"currentPassword,omitempty"`
+	IsAdmin         int    `json:"isAdmin,omitempty"`
 	CreatedDate     string `json:"createdDate,omitempty"`
 	ModifiedDate    string `json:"modifiedDate,omitempty"`
 	DeletedDate     string `json:"deletedDate,omitempty"`

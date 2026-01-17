@@ -6,10 +6,12 @@ export async function updateAuthUI() {
     const loginBtn = document.getElementById('loginBtn');
     const userMenu = document.getElementById('userMenu');
     const userEmailEl = document.getElementById('userEmail');
+    const adminLink = document.getElementById('adminLink');
 
     if (isAuthenticated()) {
         if (!userEmail) {
             const cachedEmail = localStorage.getItem('userEmail');
+            const cachedIsAdmin = localStorage.getItem('isAdmin');
             if (cachedEmail) {
                 userEmail = cachedEmail;
             } else {
@@ -17,10 +19,17 @@ export async function updateAuthUI() {
                 if (user && user.email) {
                     userEmail = user.email;
                     localStorage.setItem('userEmail', user.email);
+                    localStorage.setItem('isAdmin', user.isAdmin ? '1' : '0');
                 }
+            }
+            if (cachedIsAdmin === null) {
+                const user = await getCurrentUser();
+                if (user) localStorage.setItem('isAdmin', user.isAdmin ? '1' : '0');
             }
         }
 
+        const isAdmin = localStorage.getItem('isAdmin') === '1';
+        if (adminLink) adminLink.classList.toggle('hidden', !isAdmin);
         if (userEmailEl && userEmail) userEmailEl.textContent = userEmail;
         if (loginBtn) loginBtn.classList.add('hidden');
         if (userMenu) userMenu.classList.remove('hidden');
@@ -29,6 +38,7 @@ export async function updateAuthUI() {
         if (userEmailEl) userEmailEl.textContent = '';
         if (loginBtn) loginBtn.classList.remove('hidden');
         if (userMenu) userMenu.classList.add('hidden');
+        if (adminLink) adminLink.classList.add('hidden');
     }
 }
 
@@ -37,7 +47,7 @@ export function render() {
         <nav class="navbar">
             <div class="nav-container">
                 <a href="#/" class="nav-brand">Celestial Arcade</a>
-                <div class="nav-links"><a href="#/games" class="nav-link">Games</a></div>
+                <div class="nav-links"><a href="#/games" class="nav-link">Games</a><a href="#/admin" class="nav-link hidden" id="adminLink">Admin</a></div>
                 <div class="nav-actions">
                     <button class="theme-toggle" data-action="toggle-theme" aria-label="Toggle theme">
                         <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>

@@ -5,6 +5,7 @@ import { render as renderNavbar, updateAuthUI } from '../components/navbar.js';
 import { render as renderAuthModal } from '../components/auth-modal.js';
 import { render as renderHome } from './pages/home.js';
 import { render as renderGames } from './pages/games.js';
+import { render as renderAdmin } from './pages/admin.js';
 import { renderGamePlayer } from './components/game-player.js';
 import { initProgressionDB, startAutoSync } from './modules/progression.js';
 import { isAuthenticated } from './modules/api-client.js';
@@ -46,6 +47,11 @@ async function init() {
 
     registerRoute('/play/:slug', async (params) => {
         await renderGamePlayer(params.slug);
+        await updateAuthUI();
+    });
+
+    registerRoute('/admin', async () => {
+        await renderAdmin();
         await updateAuthUI();
     });
 

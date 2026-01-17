@@ -96,9 +96,9 @@ func GetCurrentUser(c *fiber.Ctx, db *sql.DB) error {
 		return middleware.ErrorResponse(c, 401, "Unauthorized")
 	}
 
-	row := db.QueryRow("SELECT id, email, createdDate, modifiedDate FROM users WHERE id = ? AND isDeleted=0", currentUserId)
+	row := db.QueryRow("SELECT id, email, isAdmin, createdDate, modifiedDate FROM users WHERE id = ? AND isDeleted=0", currentUserId)
 	var user model.User
-	if err := row.Scan(&user.Id, &user.Email, &user.CreatedDate, &user.ModifiedDate); err != nil {
+	if err := row.Scan(&user.Id, &user.Email, &user.IsAdmin, &user.CreatedDate, &user.ModifiedDate); err != nil {
 		return middleware.ErrorResponse(c, 404, "User not found")
 	}
 	return c.JSON(user)
