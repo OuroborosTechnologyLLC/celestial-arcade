@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3';
 const STATIC_CACHE = `static-${CACHE_VERSION}`;
 const GAME_CACHE_PREFIX = 'game-';
 
@@ -10,7 +10,7 @@ const STATIC_ASSETS = [
     '/public/js/modules/progression.js',
     '/public/js/modules/game-cache.js',
     'https://cdn.tailwindcss.com',
-    'https://cdn.jsdelivr.net/npm/alpinejs@3.14.3/dist/cdn.min.js'
+    'https://cdn.jsdelivr.net/npm/alpinejs@3.14.3/dist/module.esm.js'
 ];
 
 self.addEventListener('install', (event) => {

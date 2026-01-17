@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Celestial Arcade</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.3/dist/cdn.min.js"></script>
-    <script>
+        <script>
         tailwind.config = {
             darkMode: ['selector', '[data-theme="dark"]'],
             theme: {
@@ -276,7 +275,7 @@
                 <button type="submit" :disabled="submitting" class="inline-flex h-10 w-full items-center justify-center rounded bg-primary text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50" x-text="submitting ? 'Please wait...' : ($store.app.authMode === 'login' ? 'Login' : 'Sign Up')"></button>
             </form>
             <div class="mt-4 text-center text-sm">
-                <span x-text="$store.app.authMode === 'login' ? 'Don\\'t have an account?' : 'Already have an account?'"></span>
+                <span x-text="$store.app.authMode === 'login' ? 'Don&#39;t have an account?' : 'Already have an account?'"></span>
                 <button @click="$store.app.authMode = $store.app.authMode === 'login' ? 'register' : 'login'; message = ''" class="ml-1 text-primary underline" x-text="$store.app.authMode === 'login' ? 'Sign up' : 'Login'"></button>
             </div>
         </div>

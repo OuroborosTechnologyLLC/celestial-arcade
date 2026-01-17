@@ -1,3 +1,4 @@
+import Alpine from 'https://cdn.jsdelivr.net/npm/alpinejs@3.14.3/dist/module.esm.js';
 import { apiFetch, clearAuth, isAuthenticated, getCurrentUser } from './modules/api-client.js';
 import { initProgressionDB, getProgression, updateProgression, syncWithServer, startAutoSync } from './modules/progression.js';
 import { getGameCacheStatus, downloadGame, deleteGameCache, getCacheSize, formatBytes } from './modules/game-cache.js';
@@ -9,7 +10,7 @@ function escapeHtml(str) {
     return div.innerHTML;
 }
 
-document.addEventListener('alpine:init', () => {
+window.Alpine = Alpine;
     Alpine.store('app', {
         isAuthenticated: false,
         userEmail: '',
@@ -432,4 +433,5 @@ document.addEventListener('alpine:init', () => {
             return new Date(dateStr).toLocaleDateString();
         }
     }));
-});
+
+Alpine.start();
